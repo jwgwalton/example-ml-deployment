@@ -23,7 +23,7 @@ ENV/
 # MLFlow (we only need the model/ directory)
 mlruns/
 mlartifacts/
-src/mlruns/
+src/
 
 # OS
 .DS_Store
