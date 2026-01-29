@@ -8,10 +8,11 @@ This project demonstrates a complete machine learning deployment pipeline featur
 
 - **Custom Feature Transformer**: A scikit-learn transformer that creates polynomial and interaction features
 - **ML Pipeline**: Uses sklearn's Pipeline API for clean, reproducible model training
-- **MLFlow Integration**: Tracks experiments and saves models as MLFlow artifacts
+- **MLFlow Integration**: Tracks experiments and saves models as MLFlow artifacts (using MLflow 3.5.0+ for security)
 - **MLFlow Serving**: Uses MLFlow's built-in model serving for standardized REST API
 - **Containerization**: Docker container for consistent deployment
 - **CI/CD Pipeline**: GitHub Actions workflow for automated training and deployment to Google Cloud Run
+- **Security**: All dependencies updated to latest secure versions
 
 ## Project Structure
 
