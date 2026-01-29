@@ -100,7 +100,7 @@ jobs:
         env:
           API_URL: http://localhost:8080
         run: |
-          uv run --dev python tests/test_api.py
+          uv run --with requests python tests/test_api.py
       
       - name: Stop and remove Docker container
         if: always()

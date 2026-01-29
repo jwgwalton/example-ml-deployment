@@ -136,13 +136,22 @@ python tests/test_api.py
 
 The project includes a comprehensive Python test suite that validates the API endpoints.
 
+**Quick Start (using the test script):**
+```bash
+# Train the model first
+cd src && python train.py && cd ..
+
+# Run all tests with Docker (builds, runs container, tests, and cleans up)
+./run_tests.sh
+```
+
 **Using UV (recommended):**
 ```bash
 # Start the MLFlow server (in one terminal)
 mlflow models serve -m ./model -h 0.0.0.0 -p 8080 --no-conda
 
 # Run tests (in another terminal)
-uv run python tests/test_api.py
+uv run --with requests python tests/test_api.py
 ```
 
 **Using Docker:**
@@ -152,7 +161,7 @@ docker build -t wine-classifier .
 docker run -d -p 8080:8080 --name wine-test wine-classifier
 
 # Run tests
-uv run python tests/test_api.py
+uv run --with requests python tests/test_api.py
 
 # Clean up
 docker stop wine-test && docker rm wine-test
