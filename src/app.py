@@ -54,7 +54,7 @@ def predict():
     
     Expected JSON format:
     {
-        "features": [[5.9, 1.04, 0.05, 1.8, 0.084, 5.0, 13.0, 0.9927, 3.22, 0.55, 9.9]]
+        "features": [[13.2, 2.77, 2.51, 18.5, 96.6, 1.09, 0.52, 0.2, 0.29, 1.98, 0.13, 1.51, 660]]
     }
     
     Returns:
@@ -71,13 +71,22 @@ def predict():
         data = request.get_json()
         
         if "features" not in data:
-            return jsonify({"error": "Missing 'features' in request body"}), 400
+            return jsonify({
+                "error": "Missing 'features' in request body. Expected format: {\"features\": [[...]]}"
+            }), 400
         
         features = np.array(data["features"])
         
         # Validate input shape
         if len(features.shape) != 2:
             return jsonify({"error": "Features must be a 2D array"}), 400
+        
+        # Validate number of features (Wine dataset requires 13 features)
+        if features.shape[1] != 13:
+            return jsonify({
+                "error": f"Expected 13 features, but got {features.shape[1]}. "
+                        "Please provide all 13 wine chemical properties."
+            }), 400
         
         # Make prediction
         predictions = model.predict(features)
@@ -88,8 +97,13 @@ def predict():
             "probabilities": probabilities.tolist()
         })
     
+    except ValueError as e:
+        # Handle validation errors more gracefully
+        return jsonify({"error": f"Invalid input data: {str(e)}"}), 400
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        # Log the full error but return a user-friendly message
+        print(f"Prediction error: {str(e)}")
+        return jsonify({"error": "An error occurred during prediction"}), 500
 
 
 @app.route("/info", methods=["GET"])

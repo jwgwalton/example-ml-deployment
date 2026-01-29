@@ -204,6 +204,12 @@ To enable deployment to Google Cloud Run, configure these secrets in your GitHub
   - Artifact Registry Writer
   - Service Account User
 
+**Security Note:** The default workflow configuration deploys the API with `--allow-unauthenticated` for demonstration purposes. For production use, you should:
+- Remove the `--allow-unauthenticated` flag
+- Implement authentication (API keys, OAuth, Cloud IAM)
+- Add rate limiting to prevent abuse
+- Consider using Cloud Armor for DDoS protection
+
 ### Setting Up Google Cloud
 
 ```bash

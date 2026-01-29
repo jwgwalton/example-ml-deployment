@@ -39,7 +39,7 @@ jobs:
           python train.py
       
       - name: Upload model artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ml-model
           path: |
@@ -48,7 +48,7 @@ jobs:
           retention-days: 30
       
       - name: Upload model for deployment
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: model-deployment
           path: model/
@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Download trained model
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: model-deployment
           path: model/
@@ -105,22 +105,44 @@ jobs:
             --timeout 60 \
             --max-instances 10
       
-      - name: Get Cloud Run URL
+      - name: Test deployment
         run: |
+          # Get service URL
           SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
             --platform managed \
             --region ${{ env.REGION }} \
             --format 'value(status.url)')
+          
           echo "Service URL: $SERVICE_URL"
-          echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_ENV
-      
-      - name: Test deployment
-        run: |
-          # Wait for service to be ready
-          sleep 10
+          echo "Testing service at: $SERVICE_URL"
           
-          # Test health endpoint
-          curl -f ${{ env.SERVICE_URL }}/health || echo "Health check failed"
+          # Wait for service to be ready with retry logic
+          MAX_ATTEMPTS=12
+          ATTEMPT=1
           
-          # Test info endpoint
-          curl -f ${{ env.SERVICE_URL }}/info || echo "Info endpoint failed"
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Testing health endpoint..."
+            
+            if curl -f -s "$SERVICE_URL/health" > /dev/null 2>&1; then
+              echo "Service is ready!"
+              
+              # Run full API tests
+              echo "Testing /health endpoint..."
+              curl -f "$SERVICE_URL/health"
+              echo ""
+              
+              echo "Testing /info endpoint..."
+              curl -f "$SERVICE_URL/info"
+              echo ""
+              
+              echo "Deployment test successful!"
+              exit 0
+            fi
+            
+            echo "Service not ready yet, waiting 5 seconds..."
+            sleep 5
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          
+          echo "Service failed to become ready within timeout"
+          exit 1

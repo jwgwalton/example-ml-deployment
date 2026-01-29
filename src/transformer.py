@@ -57,6 +57,13 @@ class CustomFeatureTransformer(BaseEstimator, TransformerMixin):
         X_transformed : array-like
             Transformed data with additional features
         """
+        # Check if the transformer has been fitted
+        if self.mean_ is None or self.std_ is None:
+            raise ValueError(
+                "This CustomFeatureTransformer instance is not fitted yet. "
+                "Call 'fit' with appropriate arguments before using this transformer."
+            )
+        
         X_transformed = self._create_features(X)
         # Normalize using fitted statistics
         X_transformed = (X_transformed - self.mean_) / self.std_
