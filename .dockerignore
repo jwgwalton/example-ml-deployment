@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# MLFlow (we only need the model/ directory)
+mlruns/
+mlartifacts/
+src/mlruns/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+examples/
+
+# CI/CD
+.github/
+
+# Testing
+test_api.sh
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore

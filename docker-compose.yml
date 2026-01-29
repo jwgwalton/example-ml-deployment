@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  wine-classifier:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - MODEL_PATH=/app/model
+      - PORT=8080
+    volumes:
+      - ./model:/app/model:ro

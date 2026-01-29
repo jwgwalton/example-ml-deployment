@@ -9,7 +9,7 @@ import os
 app = Flask(__name__)
 
 # Load the model
-MODEL_PATH = os.getenv("MODEL_PATH", "model")
+MODEL_PATH = os.getenv("MODEL_PATH", "../model")
 model = None
 
 def load_model():

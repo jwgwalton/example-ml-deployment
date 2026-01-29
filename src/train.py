@@ -102,7 +102,7 @@ def train_model():
         )
         
         # Save model locally for deployment
-        model_path = "model"
+        model_path = "../model"
         os.makedirs(model_path, exist_ok=True)
         mlflow.sklearn.save_model(pipeline, model_path)
         print(f"\nModel saved to {model_path}")
