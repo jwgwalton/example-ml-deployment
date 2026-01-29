@@ -37,7 +37,7 @@ jobs:
       
       - name: Install dependencies with UV
         run: |
-          uv pip install --system .
+          uv sync --frozen
       
       - name: Train model with MLFlow
         run: |
@@ -88,7 +88,7 @@ jobs:
       
       - name: Install dependencies with UV
         run: |
-          uv pip install --system -e ".[dev]"
+          uv sync --frozen --all-extras
       
       - name: Build Docker image
         run: |

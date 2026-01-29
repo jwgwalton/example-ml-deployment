@@ -65,12 +65,8 @@ The `CustomFeatureTransformer` creates additional features:
 git clone https://github.com/jwgwalton/example-ml-deployment.git
 cd example-ml-deployment
 
-# Create virtual environment and install dependencies
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies (including dev dependencies)
-uv pip install -e ".[dev]"
+# Sync dependencies from lock file (including dev dependencies)
+uv sync --all-extras
 ```
 
 **Using pip:**
