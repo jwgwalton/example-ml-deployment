@@ -41,8 +41,7 @@ jobs:
       
       - name: Train model with MLFlow
         run: |
-          cd src
-          python train.py
+          cd src && uv run python train.py
       
       - name: Upload model artifacts
         uses: actions/upload-artifact@v4
