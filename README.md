@@ -24,11 +24,14 @@ This project demonstrates a complete machine learning deployment pipeline featur
 ├── src/
 │   ├── transformer.py            # Custom feature transformer
 │   └── train.py                  # Model training script
+├── tests/
+│   └── test_api.py               # Python API test suite
 ├── examples/
 │   └── sample_request.json       # Sample API request
+├── pyproject.toml                # UV package configuration
 ├── requirements.txt              # Python dependencies
 ├── Dockerfile                    # Container configuration
-├── test_api.sh                   # API testing script
+├── run_tests.sh                  # Automated test script with Docker
 └── README.md                     # This file
 ```
 
@@ -123,11 +126,8 @@ curl -X POST http://localhost:8080/invocations \
     }
   }'
 
-# Or use the test script (bash)
-./test_api.sh
-
 # Or use the Python test suite (requires dev dependencies)
-uv run python tests/test_api.py
+uv run --with requests python tests/test_api.py
 # Or with activated virtual environment:
 python tests/test_api.py
 ```

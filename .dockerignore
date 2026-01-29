@@ -37,7 +37,8 @@ examples/
 .github/
 
 # Testing
-test_api.sh
+tests/
+run_tests.sh
 
 # Docker
 docker-compose.yml
