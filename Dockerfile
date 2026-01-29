@@ -10,18 +10,15 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
-COPY src/ ./src/
-
 # Copy the trained model
 COPY model/ ./model/
 
 # Set environment variables
-ENV MODEL_PATH=./model
+ENV MODEL_PATH=/app/model
 ENV PORT=8080
 
 # Expose port
 EXPOSE 8080
 
-# Run the application with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--timeout", "60", "src.app:app"]
+# Run MLFlow model server
+CMD mlflow models serve -m ${MODEL_PATH} -h 0.0.0.0 -p ${PORT} --no-conda

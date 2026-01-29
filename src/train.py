@@ -93,18 +93,23 @@ def train_model():
         print("\nClassification Report (Test Set):")
         print(classification_report(y_test, y_pred_test, target_names=wine.target_names))
         
-        # Log the model
+        # Log the model with code_paths to include the transformer
         print("\nLogging model to MLFlow...")
         mlflow.sklearn.log_model(
             pipeline, 
             "model",
-            registered_model_name="wine-classifier"
+            registered_model_name="wine-classifier",
+            code_paths=["transformer.py"]
         )
         
-        # Save model locally for deployment
+        # Save model locally for deployment with code_paths
         model_path = "../model"
         os.makedirs(model_path, exist_ok=True)
-        mlflow.sklearn.save_model(pipeline, model_path)
+        mlflow.sklearn.save_model(
+            pipeline, 
+            model_path,
+            code_paths=["transformer.py"]
+        )
         print(f"\nModel saved to {model_path}")
         
         print("\n" + "="*50)

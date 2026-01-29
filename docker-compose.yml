@@ -8,5 +8,3 @@ services:
     environment:
       - MODEL_PATH=/app/model
       - PORT=8080
-    volumes:
-      - ./model:/app/model:ro

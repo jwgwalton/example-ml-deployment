@@ -9,7 +9,7 @@ This project demonstrates a complete machine learning deployment pipeline featur
 - **Custom Feature Transformer**: A scikit-learn transformer that creates polynomial and interaction features
 - **ML Pipeline**: Uses sklearn's Pipeline API for clean, reproducible model training
 - **MLFlow Integration**: Tracks experiments and saves models as MLFlow artifacts
-- **REST API**: Flask-based API for serving predictions
+- **MLFlow Serving**: Uses MLFlow's built-in model serving for standardized REST API
 - **Containerization**: Docker container for consistent deployment
 - **CI/CD Pipeline**: GitHub Actions workflow for automated training and deployment to Google Cloud Run
 
@@ -22,10 +22,12 @@ This project demonstrates a complete machine learning deployment pipeline featur
 │       └── train-and-deploy.yml  # CI/CD pipeline
 ├── src/
 │   ├── transformer.py            # Custom feature transformer
-│   ├── train.py                  # Model training script
-│   └── app.py                    # Flask API server
+│   └── train.py                  # Model training script
+├── examples/
+│   └── sample_request.json       # Sample API request
 ├── requirements.txt              # Python dependencies
 ├── Dockerfile                    # Container configuration
+├── test_api.sh                   # API testing script
 └── README.md                     # This file
 ```
 
@@ -77,89 +79,87 @@ This will:
 5. Log metrics and model to MLFlow
 6. Save the model to the `model/` directory
 
-### Running the API Locally
+### Running the API Locally with MLFlow Serving
 
 ```bash
 # Make sure you've trained the model first
-cd src
-python app.py
+# From the repository root
+mlflow models serve -m ./model -h 0.0.0.0 -p 8080 --no-conda
 ```
 
 The API will be available at `http://localhost:8080`
 
 ### Testing the API
 
+MLFlow serving provides the following endpoints:
+
 ```bash
 # Health check
 curl http://localhost:8080/health
 
-# Get model info
-curl http://localhost:8080/info
-
-# Make a prediction
-curl -X POST http://localhost:8080/predict \
+# Make a prediction using MLFlow's /invocations endpoint
+curl -X POST http://localhost:8080/invocations \
   -H "Content-Type: application/json" \
   -d '{
-    "features": [[13.2, 2.77, 2.51, 18.5, 96.6, 1.09, 0.52, 0.2, 0.29, 1.98, 0.13, 1.51, 660]]
+    "dataframe_split": {
+      "columns": ["alcohol", "malic_acid", "ash", "alcalinity_of_ash", "magnesium", "total_phenols", "flavanoids", "nonflavanoid_phenols", "proanthocyanins", "color_intensity", "hue", "od280/od315_of_diluted_wines", "proline"],
+      "data": [[13.2, 2.77, 2.51, 18.5, 96.6, 1.09, 0.52, 0.2, 0.29, 1.98, 0.13, 1.51, 660]]
+    }
   }'
+
+# Or use the test script
+./test_api.sh
 ```
 
 ## API Endpoints
 
-### GET /
-Health check endpoint
-
-**Response:**
-```json
-{
-  "status": "healthy",
-  "model_loaded": true,
-  "message": "Wine Classification API"
-}
-```
+MLFlow serving provides a standardized REST API with the following endpoints:
 
 ### GET /health
-Detailed health check
+
+Health check endpoint to verify the service is running.
 
 **Response:**
 ```json
 {
-  "status": "healthy",
-  "model_loaded": true,
-  "model_path": "./model"
+  "status": "OK"
 }
 ```
 
-### GET /info
-Model information
+### POST /invocations
 
-**Response:**
+Main prediction endpoint. Accepts input data in multiple formats.
+
+**Request Format (dataframe_split):**
 ```json
 {
-  "model_type": "Wine Classification",
-  "classes": ["class_0", "class_1", "class_2"],
-  "n_features": 13,
-  "feature_names": ["alcohol", "malic_acid", "ash", ...]
-}
-```
-
-### POST /predict
-Make predictions
-
-**Request:**
-```json
-{
-  "features": [[13.2, 2.77, 2.51, 18.5, 96.6, 1.09, 0.52, 0.2, 0.29, 1.98, 0.13, 1.51, 660]]
+  "dataframe_split": {
+    "columns": [
+      "alcohol", "malic_acid", "ash", "alcalinity_of_ash", "magnesium",
+      "total_phenols", "flavanoids", "nonflavanoid_phenols", "proanthocyanins",
+      "color_intensity", "hue", "od280/od315_of_diluted_wines", "proline"
+    ],
+    "data": [
+      [13.2, 2.77, 2.51, 18.5, 96.6, 1.09, 0.52, 0.2, 0.29, 1.98, 0.13, 1.51, 660]
+    ]
+  }
 }
 ```
 
 **Response:**
 ```json
 {
-  "predictions": [0],
-  "probabilities": [[0.95, 0.03, 0.02]]
+  "predictions": [1]
 }
 ```
+
+**Alternative Input Formats:**
+
+MLFlow also supports these input formats:
+- `dataframe_records`: `{"dataframe_records": [{"col1": val1, "col2": val2, ...}]}`
+- `instances`: `{"instances": [[val1, val2, ...]]}`
+- `inputs`: `{"inputs": [[val1, val2, ...]]}`
+
 
 ## Docker
 
