@@ -52,10 +52,25 @@ The `CustomFeatureTransformer` creates additional features:
 ### Prerequisites
 
 - Python 3.10+
-- pip
+- [UV](https://github.com/astral-sh/uv) (recommended) or pip
 
 ### Installation
 
+**Using UV (recommended):**
+```bash
+# Clone the repository
+git clone https://github.com/jwgwalton/example-ml-deployment.git
+cd example-ml-deployment
+
+# Create virtual environment and install dependencies
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies (including dev dependencies)
+uv pip install -e ".[dev]"
+```
+
+**Using pip:**
 ```bash
 # Clone the repository
 git clone https://github.com/jwgwalton/example-ml-deployment.git
@@ -108,9 +123,46 @@ curl -X POST http://localhost:8080/invocations \
     }
   }'
 
-# Or use the test script
+# Or use the test script (bash)
 ./test_api.sh
+
+# Or use the Python test suite (requires dev dependencies)
+uv run python tests/test_api.py
+# Or with activated virtual environment:
+python tests/test_api.py
 ```
+
+### Running Tests
+
+The project includes a comprehensive Python test suite that validates the API endpoints.
+
+**Using UV (recommended):**
+```bash
+# Start the MLFlow server (in one terminal)
+mlflow models serve -m ./model -h 0.0.0.0 -p 8080 --no-conda
+
+# Run tests (in another terminal)
+uv run python tests/test_api.py
+```
+
+**Using Docker:**
+```bash
+# Build and run the Docker container
+docker build -t wine-classifier .
+docker run -d -p 8080:8080 --name wine-test wine-classifier
+
+# Run tests
+uv run python tests/test_api.py
+
+# Clean up
+docker stop wine-test && docker rm wine-test
+```
+
+The test suite includes:
+- Health endpoint validation
+- Single prediction test
+- Multiple predictions test
+- Automatic service availability checking with retry logic
 
 ## API Endpoints
 
@@ -185,11 +237,19 @@ docker run -p 8080:8080 wine-classifier
 The GitHub Actions workflow (`.github/workflows/train-and-deploy.yml`) automates:
 
 1. **Training Job**: 
-   - Installs dependencies
+   - Installs dependencies using UV
    - Trains the model with MLFlow
    - Uploads model artifacts
 
-2. **Deployment Job** (only on main branch):
+2. **Test Job**:
+   - Downloads trained model
+   - Builds Docker container
+   - Runs container locally
+   - Executes Python test suite using UV with `--dev` flag
+   - Validates health and prediction endpoints
+   - Cleans up container
+
+3. **Deployment Job** (only on main branch, runs after tests pass):
    - Downloads trained model
    - Builds Docker image
    - Pushes to Google Artifact Registry

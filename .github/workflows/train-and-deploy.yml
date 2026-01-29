@@ -55,10 +55,63 @@ jobs:
           name: model-deployment
           path: model/
 
+  test-model:
+    name: Test Model with Docker
+    runs-on: ubuntu-latest
+    needs: train-model
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download trained model
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: model-deployment
+          path: model/
+      
+      - name: Install UV
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies with UV
+        run: |
+          uv pip install --system -r requirements.txt
+          uv pip install --system -e ".[dev]"
+      
+      - name: Build Docker image
+        run: |
+          docker build -t wine-classifier:test .
+      
+      - name: Run Docker container
+        run: |
+          docker run -d -p 8080:8080 --name wine-classifier-test wine-classifier:test
+          echo "Container started, waiting for it to be ready..."
+      
+      - name: Run tests with UV
+        env:
+          API_URL: http://localhost:8080
+        run: |
+          uv run --dev python tests/test_api.py
+      
+      - name: Stop and remove Docker container
+        if: always()
+        run: |
+          docker stop wine-classifier-test || true
+          docker rm wine-classifier-test || true
+
   deploy-to-cloud-run:
     name: Deploy to Google Cloud Run
     runs-on: ubuntu-latest
-    needs: train-model
+    needs: [train-model, test-model]
     permissions:
       contents: read
       id-token: write
