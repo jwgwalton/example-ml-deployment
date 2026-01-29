@@ -29,7 +29,7 @@ This project demonstrates a complete machine learning deployment pipeline featur
 ├── examples/
 │   └── sample_request.json       # Sample API request
 ├── pyproject.toml                # UV package configuration
-├── requirements.txt              # Python dependencies
+├── uv.lock                       # UV lock file for reproducible builds
 ├── Dockerfile                    # Container configuration
 ├── run_tests.sh                  # Automated test script with Docker
 └── README.md                     # This file
@@ -55,7 +55,7 @@ The `CustomFeatureTransformer` creates additional features:
 ### Prerequisites
 
 - Python 3.10+
-- [UV](https://github.com/astral-sh/uv) (recommended) or pip
+- [UV](https://github.com/astral-sh/uv) (recommended package manager)
 
 ### Installation
 
@@ -80,7 +80,7 @@ git clone https://github.com/jwgwalton/example-ml-deployment.git
 cd example-ml-deployment
 
 # Install dependencies
-pip install -r requirements.txt
+pip install -e ".[dev]"
 ```
 
 ### Training the Model

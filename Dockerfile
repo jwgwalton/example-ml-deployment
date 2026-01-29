@@ -4,11 +4,14 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Install UV
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy dependency files for better caching
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies using UV
+RUN uv pip install --system --no-cache .
 
 # Copy the trained model
 COPY model/ ./model/
